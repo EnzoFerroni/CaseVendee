@@ -54,6 +54,7 @@ CaseVendee/
 ├── ViewModels/      MovieListViewModel
 ├── Views/           MovieCell, PosterImageView
 └── Controllers/     MovieListViewController, MovieDetailViewController
+CaseVendeeTests/     MovieTests, MovieListViewModelTests
 ```
 
 The view model notifies the view through two closures (`onMoviesUpdated`, `onError`), with no third-party framework needed.
@@ -91,3 +92,19 @@ All TMDb requests use `URLSession` with `async/await`. Each call is wrapped in a
 **API token via `Secrets.xcconfig`**
 
 The TMDb token is injected at build time through a gitignored `.xcconfig` file. At runtime, `Secrets.swift` reads it from `Bundle.main.infoDictionary`, keeping the key out of version control.
+
+**Unit tests with a fake service**
+
+The view model receives its service through the small `MovieFetching` protocol. The tests inject a mock that returns fixed movies, so the model logic and its callbacks are verified without touching the network. The `Movie` computed properties and the TMDb JSON decoding are also covered. Run with **Cmd+U**.
+
+**Loading and empty states**
+
+The view model exposes an `onLoadingChanged` closure that drives a spinner during requests, and the list shows a "No movies found" message when a search returns nothing.
+
+**Dynamic Type**
+
+All labels use scalable fonts with `adjustsFontForContentSizeCategory`, so the app respects the text size chosen by the user in Settings.
+
+**Pagination left out on purpose**
+
+TMDb responses are paginated, but the app intentionally shows only the first page (20 movies) to keep the code minimal. Adding infinite scroll would mean tracking the current page in the view model and triggering a fetch from `willDisplay`.
