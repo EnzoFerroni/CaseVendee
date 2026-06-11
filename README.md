@@ -30,13 +30,13 @@ cd CaseVendee
 
 **2. Add your TMDb token**
 
-The token is kept out of version control. Create `CaseVendee/Secrets.xcconfig` with your own token (themoviedb.org → Settings → API → "API Read Access Token"):
+The token is kept out of version control. Create `CaseVendee/Secrets.xcconfig` with your own token (themoviedb.org, Settings, API, "API Read Access Token"):
 
 ```
 TMDB_ACCESS_TOKEN = your_token_here
 ```
 
-Then open `CaseVendee.xcodeproj`, go to the project settings → Info → Configurations, and set `Secrets` as the configuration file for both Debug and Release.
+Then open `CaseVendee.xcodeproj`, go to the project settings, Info, Configurations, and set `Secrets` as the configuration file for both Debug and Release.
 
 **3. Run**
 
@@ -44,7 +44,7 @@ Select an iOS Simulator and press Run. No package resolution or extra setup is n
 
 ## Architecture
 
-The app follows **MVVM**. The view controller belongs to the View layer — it only builds the layout and forwards user events. All state and logic live in the view model, and networking in a dedicated service layer.
+The app follows **MVVM**. The view controller only builds the layout and forwards user events. All state and logic live in the view model, and networking in a dedicated service layer.
 
 ```
 CaseVendee/
@@ -56,30 +56,30 @@ CaseVendee/
 └── Controllers/     MovieListViewController, MovieDetailViewController
 ```
 
-The view model notifies the view through two closures (`onMoviesUpdated`, `onError`) — no third-party framework needed.
+The view model notifies the view through two closures (`onMoviesUpdated`, `onError`), with no third-party framework needed.
 
 ## Technical Decisions
 
-**UIKit with view code**
-Every layout is built with Auto Layout in code. The window itself is created programmatically in `SceneDelegate`, which is the only difference from the Xcode template. No `.xib` or `.storyboard` files are used.
+**View code**
+Every layout is built with Auto Layout in code. The window is created programmatically in `SceneDelegate` and no storyboard files are used.
 
-**`final class` on every type**
-All classes are marked `final` because none of them are designed to be subclassed. This tells the compiler to use direct dispatch instead of dynamic dispatch on every method call, and communicates intent clearly to anyone reading the code.
+**`final class`**
+All classes are marked `final` because none are designed to be subclassed. This enables direct dispatch instead of dynamic dispatch on every method call, and makes the intent clear to anyone reading the code.
 
-**Memory management**
-`[weak self]` is used in every closure where the view controller is captured — specifically in the view model bindings and in the year filter menu actions — to avoid retain cycles. The view model owns the closures, and without `weak self` the view controller would be kept alive indefinitely after the screen closes.
+**Retain cycles and `[weak self]`**
+`[weak self]` is used in every closure that captures the view controller, specifically in the view model bindings and in the year filter menu actions. Without it, the view model would hold a strong reference back to the view controller, keeping it alive after the screen closes.
 
-**Poster image cache**
-`ImageLoader` uses `NSCache` to keep downloaded posters in memory. Unlike a plain dictionary, `NSCache` is automatically purged by the system under memory pressure, which makes it a safe choice for image caching without manual eviction logic.
+**Poster cache with `NSCache`**
+`ImageLoader` keeps downloaded posters in an `NSCache`. Unlike a dictionary, `NSCache` is automatically purged by the system under memory pressure, so there is no need for manual eviction logic.
 
-**Cell reuse and task cancellation**
-`UITableViewCell` instances are recycled as the user scrolls. `PosterImageView` keeps a reference to its active download `Task` and cancels it in `prepareForReuse`. Without this, a cell recycled for a new row could briefly show the poster of the previous movie while the new download completes.
+**Cell reuse and download cancellation**
+`UITableViewCell` instances are recycled as the user scrolls. `PosterImageView` holds a reference to its active download `Task` and cancels it in `prepareForReuse`, preventing a recycled cell from briefly showing the poster of the previous movie.
 
-**`@MainActor` on the view model**
-`MovieListViewModel` is annotated with `@MainActor`, which guarantees that every property change and closure callback runs on the main thread. UIKit requires all UI updates to happen on the main thread — this annotation enforces that automatically instead of relying on manual `DispatchQueue.main.async` calls.
+**`@MainActor`**
+`MovieListViewModel` is annotated with `@MainActor` so every property update and closure callback is guaranteed to run on the main thread, which UIKit requires for all UI updates.
 
 **`async/await` networking**
-All TMDb requests use `URLSession` with `async/await`. The view model wraps each call in a `Task` so it can be triggered from synchronous UIKit code like `viewDidLoad`. Errors are caught and forwarded to the view through the `onError` closure.
+All TMDb requests use `URLSession` with `async/await`. Each call is wrapped in a `Task` so it can be triggered from synchronous UIKit code. Errors are caught and forwarded to the view through the `onError` closure.
 
-**API token security**
-The TMDb token is injected at build time via `Secrets.xcconfig`, which is gitignored. At runtime, `Secrets.swift` reads the token from `Bundle.main.infoDictionary`. This keeps the key out of version control while remaining straightforward for local development.
+**API token via `Secrets.xcconfig`**
+The TMDb token is injected at build time through a gitignored `.xcconfig` file. At runtime, `Secrets.swift` reads it from `Bundle.main.infoDictionary`, keeping the key out of version control.
