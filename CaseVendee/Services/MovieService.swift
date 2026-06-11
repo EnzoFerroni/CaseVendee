@@ -13,10 +13,17 @@ enum MovieServiceError: Error {
     case requestFailed
 }
 
+// What the view model needs from a movie service.
+// Lets tests replace the real service with a fake one.
+protocol MovieFetching {
+    func fetchPopularMovies(year: Int?) async throws -> [Movie]
+    func searchMovies(query: String, year: Int?) async throws -> [Movie]
+}
+
 // Handles all communication with the TMDb API.
 // Every request goes through fetchMovies, which builds the URL,
 // sends the request and decodes the response.
-struct MovieService {
+struct MovieService: MovieFetching {
 
     private let accessToken = Secrets.tmdbAccessToken
     private let baseURL = "https://api.themoviedb.org/3"

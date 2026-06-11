@@ -19,17 +19,27 @@ final class MovieListViewModel {
     // Called with an error message when a request fails.
     var onError: ((String) -> Void)?
 
+    // Called when a request starts or ends so the view can show a spinner.
+    var onLoadingChanged: ((Bool) -> Void)?
+
     // Year selected in the filter menu. nil means no filter.
     var selectedYear: Int?
 
     // The movies shown on screen. Only this class can change the list.
     private(set) var movies: [Movie] = []
 
-    private let service = MovieService()
+    private let service: MovieFetching
+
+    // The service can be injected so tests can pass a fake one.
+    init(service: MovieFetching? = nil) {
+        self.service = service ?? MovieService()
+    }
 
     // Loads the most popular movies. Used on launch and after cancelling a search.
     func loadPopularMovies() {
         Task {
+            onLoadingChanged?(true)
+
             do {
                 movies = try await service.fetchPopularMovies(year: selectedYear)
                 onMoviesUpdated?()
@@ -37,6 +47,8 @@ final class MovieListViewModel {
             catch {
                 onError?("Could not load movies. Check your connection.")
             }
+
+            onLoadingChanged?(false)
         }
     }
 
@@ -48,6 +60,8 @@ final class MovieListViewModel {
         }
 
         Task {
+            onLoadingChanged?(true)
+
             do {
                 movies = try await service.searchMovies(
                     query: query,
@@ -58,6 +72,8 @@ final class MovieListViewModel {
             catch {
                 onError?("Search failed. Try again.")
             }
+
+            onLoadingChanged?(false)
         }
     }
 }
