@@ -20,6 +20,12 @@ final class MovieListViewController: UIViewController {
     // Search bar shown inside the navigation bar.
     private let searchController = UISearchController()
 
+    // Spinner shown while a request is loading.
+    private let loadingIndicator = UIActivityIndicatorView(style: .large)
+
+    // Message shown behind the table when a search returns no movies.
+    private let emptyLabel = UILabel()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -47,13 +53,26 @@ final class MovieListViewController: UIViewController {
         tableView.register(MovieCell.self, forCellReuseIdentifier: MovieCell.identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
+        emptyLabel.text = "No movies found"
+        emptyLabel.textAlignment = .center
+        emptyLabel.textColor = .secondaryLabel
+        emptyLabel.font = .preferredFont(forTextStyle: .body)
+        emptyLabel.adjustsFontForContentSizeCategory = true
+
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+
         view.addSubview(tableView)
+        view.addSubview(loadingIndicator)
 
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 
@@ -61,11 +80,26 @@ final class MovieListViewController: UIViewController {
     // weak self prevents a retain cycle between the controller and the view model.
     private func setupBindings() {
         viewModel.onMoviesUpdated = { [weak self] in
-            self?.tableView.reloadData()
+            guard let self else {
+                return
+            }
+
+            tableView.reloadData()
+            // Shows the empty message only when there are no movies.
+            tableView.backgroundView = viewModel.movies.isEmpty ? emptyLabel : nil
         }
 
         viewModel.onError = { [weak self] message in
             self?.showError(message)
+        }
+
+        viewModel.onLoadingChanged = { [weak self] isLoading in
+            if isLoading {
+                self?.loadingIndicator.startAnimating()
+            }
+            else {
+                self?.loadingIndicator.stopAnimating()
+            }
         }
     }
 
