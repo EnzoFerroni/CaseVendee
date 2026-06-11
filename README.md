@@ -66,13 +66,16 @@ The app follows **MVVM**. In UIKit, the view controller belongs to the View
 layer: it only builds the layout and forwards user events, while state and
 logic live in the view model, and networking in a dedicated service.
 
+Files are grouped by feature, keeping each screen's MVVM pieces together:
+
 ```
 CaseVendee/
-├── Models/        Movie, MovieResponse (Decodable)
-├── Services/      MovieService (TMDb requests), ImageLoader (poster cache)
-├── ViewModels/    MovieListViewModel (list state, search, year filter)
-├── Views/         MovieCell (view code), MovieDetailView (SwiftUI)
-└── Controllers/   MovieListViewController (UI only)
+├── App/                 AppDelegate, SceneDelegate (window in code)
+├── Models/              Movie, MovieResponse (Decodable)
+├── Services/            MovieService (TMDb requests), ImageLoader (poster cache)
+└── Features/
+    ├── MovieList/       MovieListViewController, MovieListViewModel, MovieCell
+    └── MovieDetail/     MovieDetailView (SwiftUI)
 ```
 
 The view model notifies the view through closures (`onMoviesUpdated`,
