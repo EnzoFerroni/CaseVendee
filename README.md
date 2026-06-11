@@ -17,6 +17,12 @@ The project was developed for a selection case and intentionally mirrors the
 scenario described in the job posting: a consolidated UIKit codebase being
 **gradually migrated to SwiftUI**.
 
+## Screenshots
+
+| Popular movies | Year filter | Search | Detail (SwiftUI) |
+| --- | --- | --- | --- |
+| ![Movie list](Screenshots/movie-list.png) | ![Year filter](Screenshots/year-filter.png) | ![Search](Screenshots/search.png) | ![Movie detail](Screenshots/movie-detail.png) |
+
 ## Features
 
 - Popular movies list consuming the TMDb API
