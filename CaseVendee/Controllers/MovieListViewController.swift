@@ -90,7 +90,7 @@ final class MovieListViewController: UIViewController {
     }
 
     private func applyYearFilter(_ year: Int?) {
-        viewModel.selectYear(year)
+        viewModel.selectedYear = year
         searchMovies()
     }
 

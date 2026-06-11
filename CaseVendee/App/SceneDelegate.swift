@@ -8,7 +8,7 @@
 import UIKit
 
 /// Creates the window in code, since the project has no storyboards.
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(

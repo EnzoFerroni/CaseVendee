@@ -17,8 +17,10 @@ final class MovieListViewModel {
     /// Called with a user-friendly message when a request fails.
     var onError: ((String) -> Void)?
 
+    /// Year used to filter both the popular list and the search.
+    var selectedYear: Int?
+
     private(set) var movies: [Movie] = []
-    private(set) var selectedYear: Int?
 
     private let service = MovieService()
 
@@ -56,10 +58,5 @@ final class MovieListViewModel {
                 onError?("Search failed. Try again.")
             }
         }
-    }
-
-    /// Stores the year filter; `nil` means all years.
-    func selectYear(_ year: Int?) {
-        selectedYear = year
     }
 }
