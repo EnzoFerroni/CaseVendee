@@ -3,7 +3,7 @@ xcuserdata/
 *.xcuserstate
 
 # API keys (each developer creates this file locally)
-Secrets.swift
+Secrets.xcconfig
 
 # macOS
 .DS_Store
