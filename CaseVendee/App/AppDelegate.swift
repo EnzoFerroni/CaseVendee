@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// App entry point. All delegate methods are optional and the scene
-/// configuration is declared in Info.plist, so nothing is needed here.
+// Entry point of the app. The window setup lives in SceneDelegate,
+// so nothing else is needed here.
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {}

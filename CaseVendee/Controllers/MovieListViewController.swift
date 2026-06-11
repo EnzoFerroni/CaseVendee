@@ -7,19 +7,17 @@
 
 import UIKit
 
-/// Main screen: movie table, search bar and release-year filter.
-///
-/// In MVVM the view controller belongs to the View layer: this class
-/// only builds the layout and forwards user events. All data and
-/// logic live in ``MovieListViewModel``.
+// Main screen with the movie list, search bar and release year filter.
+// This class only handles layout and user events. All data lives in the view model.
 final class MovieListViewController: UIViewController {
-    /// Source of truth of the screen (movies, search, filter).
+
+    // Holds all the data and logic for this screen.
     private let viewModel = MovieListViewModel()
 
-    /// Table that displays one ``MovieCell`` per movie.
+    // Table that shows the list of movies.
     private let tableView = UITableView()
 
-    /// System search controller shown inside the navigation bar.
+    // Search bar shown inside the navigation bar.
     private let searchController = UISearchController()
 
     override func viewDidLoad() {
@@ -31,7 +29,7 @@ final class MovieListViewController: UIViewController {
 
     // MARK: - Setup
 
-    /// Builds the layout in view code: navigation bar, search and table.
+    // Builds the navigation bar, search bar and table.
     private func setupView() {
         title = "Movies"
         view.backgroundColor = .systemBackground
@@ -40,8 +38,7 @@ final class MovieListViewController: UIViewController {
 
         searchController.searchBar.placeholder = "Search movies"
         searchController.searchBar.delegate = self
-        // Keeps the navigation bar (and the filter button) visible
-        // while the user is typing a search.
+        // Keeps the navigation bar visible while the user types.
         searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.searchController = searchController
 
@@ -52,8 +49,6 @@ final class MovieListViewController: UIViewController {
 
         view.addSubview(tableView)
 
-        // The table fills the whole screen; the safe area is handled
-        // automatically by the table view content insets.
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -62,11 +57,8 @@ final class MovieListViewController: UIViewController {
         ])
     }
 
-    /// Connects the view model callbacks to UI updates.
-    ///
-    /// `[weak self]` breaks the reference cycle that would otherwise
-    /// exist: the controller owns the view model, and the view model
-    /// would own the controller back through these closures.
+    // Connects the view model callbacks to UI updates.
+    // weak self prevents a retain cycle between the controller and the view model.
     private func setupBindings() {
         viewModel.onMoviesUpdated = { [weak self] in
             self?.tableView.reloadData()
@@ -79,24 +71,19 @@ final class MovieListViewController: UIViewController {
 
     // MARK: - Year filter
 
-    /// Creates the filter button with a menu of the last 10 years.
-    ///
-    /// `UIMenu` attached to a bar button is the standard iOS pattern
-    /// for a small list of options — no custom screen needed.
-    ///
-    /// - Returns: The configured bar button item.
+    // Creates the filter button with a menu listing recent years.
     private func makeFilterButton() -> UIBarButtonItem {
         let currentYear = Calendar.current.component(.year, from: Date())
         let years = Array((currentYear - 10)...currentYear).reversed()
 
-        // First option clears the filter ("All years")...
+        // First option removes the filter and shows all years.
         var actions = [
             UIAction(title: "All years") { [weak self] _ in
                 self?.applyYearFilter(nil)
             }
         ]
 
-        // ...followed by one action per year, newest first.
+        // One option per year, newest first.
         actions += years.map { year in
             UIAction(title: String(year)) { [weak self] _ in
                 self?.applyYearFilter(year)
@@ -109,25 +96,21 @@ final class MovieListViewController: UIViewController {
         )
     }
 
-    /// Stores the chosen year and refreshes the current results.
-    ///
-    /// - Parameter year: Selected year, or `nil` for "All years".
+    // Saves the selected year and refreshes the results.
     private func applyYearFilter(_ year: Int?) {
         viewModel.selectedYear = year
         searchMovies()
     }
 
-    /// Asks the view model to search with the current search bar text.
+    // Asks the view model to search using the current search bar text.
     private func searchMovies() {
         viewModel.searchMovies(query: searchController.searchBar.text ?? "")
     }
 
-    /// Presents a simple alert with the given error message.
-    ///
-    /// - Parameter message: User-friendly text from the view model.
+    // Shows an alert with the error message.
     private func showError(_ message: String) {
         let alert = UIAlertController(
-            title: "Oops", message: message, preferredStyle: .alert
+            title: "Erro", message: message, preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
@@ -137,26 +120,17 @@ final class MovieListViewController: UIViewController {
 // MARK: - UITableViewDataSource
 
 extension MovieListViewController: UITableViewDataSource {
-    /// One row per movie held by the view model.
-    func tableView(
-        _ tableView: UITableView,
-        numberOfRowsInSection section: Int
-    ) -> Int {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         viewModel.movies.count
     }
 
-    /// Dequeues a reusable ``MovieCell`` and fills it with the movie
-    /// of the requested row.
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: MovieCell.identifier, for: indexPath
         )
 
-        // `guard` instead of force cast: if the cast ever fails the
-        // app shows an empty cell instead of crashing.
+        // Falls back to an empty cell if the cast fails, instead of crashing.
         guard let movieCell = cell as? MovieCell else {
             return cell
         }
@@ -170,9 +144,9 @@ extension MovieListViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 
 extension MovieListViewController: UITableViewDelegate {
-    /// Opens the detail screen for the tapped movie.
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // Removes the gray selection highlight when coming back.
+        // Removes the selection highlight when coming back to this screen.
         tableView.deselectRow(at: indexPath, animated: true)
 
         let movie = viewModel.movies[indexPath.row]
@@ -185,12 +159,13 @@ extension MovieListViewController: UITableViewDelegate {
 // MARK: - UISearchBarDelegate
 
 extension MovieListViewController: UISearchBarDelegate {
-    /// Searches when the user taps the keyboard "Search" button.
+
+    // Searches when the user taps the Search button on the keyboard.
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchMovies()
     }
 
-    /// Restores the popular list when the search is cancelled.
+    // Goes back to the popular list when the user cancels the search.
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.loadPopularMovies()
     }

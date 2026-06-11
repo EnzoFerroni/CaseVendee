@@ -7,18 +7,14 @@
 
 import UIKit
 
-/// Table cell built with view code: poster, title, year and rating.
+// Table cell showing the poster, title, year and rating of a movie.
 final class MovieCell: UITableViewCell {
-    /// Reuse identifier used by `register`/`dequeue` on the table view.
+
+    // Used by the table view to create and reuse cells of this type.
     static let identifier = "MovieCell"
 
-    /// Shared poster component (download, cache and placeholder).
     private let posterImageView = PosterImageView()
-
-    /// Movie title, up to two lines.
     private let titleLabel = UILabel()
-
-    /// Secondary "year · rating" line.
     private let infoLabel = UILabel()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -26,46 +22,34 @@ final class MovieCell: UITableViewCell {
         setupView()
     }
 
-    /// Never called: the app builds every view in code. Returning
-    /// `nil` avoids the usual `fatalError` boilerplate.
+    // Required by UIKit but never used since the app has no storyboards.
     required init?(coder: NSCoder) {
         nil
     }
 
-    /// Cells are recycled while the user scrolls; cancelling the
-    /// download here prevents a poster from a previous movie from
-    /// appearing on the wrong row.
+    // Cancels the poster download when the cell is reused for a different movie.
     override func prepareForReuse() {
         super.prepareForReuse()
         posterImageView.cancelLoading()
     }
 
-    /// Fills the cell with the movie data and loads its poster.
-    ///
-    /// - Parameter movie: Movie of the row being displayed.
+    // Fills the cell with the movie data.
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
         infoLabel.text = movie.summaryText
         posterImageView.showPoster(from: movie.posterURL)
     }
 
-    /// Builds the layout in code: poster on the left, labels stacked
-    /// vertically on the right.
+    // Builds the layout with the poster on the left and labels on the right.
     private func setupView() {
-        // Chevron on the right edge, hinting the row opens a detail.
         accessoryType = .disclosureIndicator
 
-        // Text styles (instead of fixed sizes) follow the system font
-        // settings, as recommended by the HIG.
         titleLabel.font = .preferredFont(forTextStyle: .headline)
         titleLabel.numberOfLines = 2
 
         infoLabel.font = .preferredFont(forTextStyle: .subheadline)
         infoLabel.textColor = .secondaryLabel
 
-        // Stacks avoid writing one constraint per subview: the
-        // vertical stack arranges the labels, the horizontal one
-        // places the poster beside them.
         let textStack = UIStackView(arrangedSubviews: [titleLabel, infoLabel])
         textStack.axis = .vertical
         textStack.spacing = 4
@@ -79,12 +63,9 @@ final class MovieCell: UITableViewCell {
         contentView.addSubview(mainStack)
 
         NSLayoutConstraint.activate([
-            // Fixed poster size keeps every row the same height.
             posterImageView.widthAnchor.constraint(equalToConstant: 60),
             posterImageView.heightAnchor.constraint(equalToConstant: 90),
 
-            // The stack fills the cell, respecting the system margins
-            // on the sides; top/bottom define the row height.
             mainStack.topAnchor.constraint(
                 equalTo: contentView.topAnchor, constant: 8
             ),

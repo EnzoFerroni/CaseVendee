@@ -7,40 +7,35 @@
 
 import UIKit
 
-/// Detail screen in UIKit view code: poster, title, year, rating
-/// and overview of the selected movie.
-///
-/// The screen is read-only and receives the ``Movie`` it displays
-/// through the initializer, so it has no logic beyond layout —
-/// no view model is needed here.
+// Shows the details of a selected movie.
+// This screen only displays data, so it has no view model.
 final class MovieDetailViewController: UIViewController {
-    /// Movie being displayed, injected by the list screen.
+
+    // The movie passed in from the list screen.
     private let movie: Movie
 
-    /// Allows the content to scroll when the overview is long or the
-    /// user increases the system font size.
+    // Makes the content scrollable when the overview is long.
     private let scrollView = UIScrollView()
 
-    /// Shared poster component (download, cache and placeholder).
+    // Downloads and shows the movie poster.
     private let posterImageView = PosterImageView()
 
-    /// Movie title, allowed to wrap in multiple lines.
+    // Movie title, can wrap into multiple lines.
     private let titleLabel = UILabel()
 
-    /// Secondary "year · rating" line.
+    // Shows the release year and rating on a single line.
     private let infoLabel = UILabel()
 
-    /// Full synopsis of the movie.
+    // Full synopsis of the movie.
     private let overviewLabel = UILabel()
 
-    /// - Parameter movie: Movie selected on the list screen.
+    // Receives the movie from the list screen.
     init(movie: Movie) {
         self.movie = movie
         super.init(nibName: nil, bundle: nil)
     }
 
-    /// Never called: the app builds every view in code. Returning
-    /// `nil` avoids the usual `fatalError` boilerplate.
+    // Required by UIKit but never used since the app has no storyboards.
     required init?(coder: NSCoder) {
         nil
     }
@@ -51,7 +46,7 @@ final class MovieDetailViewController: UIViewController {
         showMovie()
     }
 
-    /// Builds the layout: a vertical stack inside a scroll view.
+    // Builds the layout with a vertical stack inside a scroll view.
     private func setupView() {
         view.backgroundColor = .systemBackground
 
@@ -64,8 +59,8 @@ final class MovieDetailViewController: UIViewController {
         overviewLabel.font = .preferredFont(forTextStyle: .body)
         overviewLabel.numberOfLines = 0
 
-        // One vertical stack holds the whole content, so the scroll
-        // view only needs to track a single subview.
+        // A single stack holds all content so the scroll view
+        // only needs to manage one subview.
         let stack = UIStackView(arrangedSubviews: [
             posterImageView, titleLabel, infoLabel, overviewLabel
         ])
@@ -79,14 +74,12 @@ final class MovieDetailViewController: UIViewController {
         scrollView.addSubview(stack)
 
         NSLayoutConstraint.activate([
-            // Scroll view fills the screen.
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 
-            // The stack pinned to the scroll view's content guide
-            // defines the scrollable area (with 16pt of padding)...
+            // Pin the stack to the scroll content area with padding on all sides.
             stack.topAnchor.constraint(
                 equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 16
             ),
@@ -100,26 +93,23 @@ final class MovieDetailViewController: UIViewController {
                 equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16
             ),
 
-            // ...and matching the frame guide width locks the scroll
-            // to vertical only (32 = the two side paddings).
+            // Matching the stack width to the visible area prevents horizontal scrolling.
             stack.widthAnchor.constraint(
                 equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -32
             ),
 
-            // Movie posters use the standard 2:3 aspect ratio.
+            // Keeps the poster at the standard movie aspect ratio.
             posterImageView.heightAnchor.constraint(
                 equalTo: posterImageView.widthAnchor, multiplier: 1.5
             )
         ])
     }
 
-    /// Fills the views with the movie data.
+    // Fills each view with the movie data.
     private func showMovie() {
         titleLabel.text = movie.title
         infoLabel.text = movie.summaryText
-        overviewLabel.text = movie.overview.isEmpty
-            ? "No overview available."
-            : movie.overview
+        overviewLabel.text = movie.overview.isEmpty ? "No overview available." : movie.overview
         posterImageView.showPoster(from: movie.posterURL)
     }
 }
