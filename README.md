@@ -98,7 +98,7 @@ third-party frameworks.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /movie/popular` | Initial list of the main screen |
+| `GET /discover/movie` | Main list, sorted by popularity, year filter |
 | `GET /search/movie` | Search with `query` and `primary_release_year` |
 
 ## Code Style

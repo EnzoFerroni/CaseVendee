@@ -20,9 +20,18 @@ struct MovieService {
     private let accessToken = Secrets.tmdbAccessToken
     private let baseURL = "https://api.themoviedb.org/3"
 
-    /// Fetches the most popular movies (initial content of the main screen).
-    func fetchPopularMovies() async throws -> [Movie] {
-        try await fetchMovies(path: "/movie/popular", queryItems: [])
+    /// Fetches movies sorted by popularity, optionally filtered by year.
+    /// Uses /discover because /movie/popular does not accept filters.
+    func fetchPopularMovies(year: Int?) async throws -> [Movie] {
+        var queryItems = [URLQueryItem(name: "sort_by", value: "popularity.desc")]
+
+        if let year {
+            queryItems.append(
+                URLQueryItem(name: "primary_release_year", value: String(year))
+            )
+        }
+
+        return try await fetchMovies(path: "/discover/movie", queryItems: queryItems)
     }
 
     /// Searches movies by text, optionally filtered by release year.

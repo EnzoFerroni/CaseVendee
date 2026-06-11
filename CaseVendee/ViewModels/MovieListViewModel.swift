@@ -22,11 +22,12 @@ final class MovieListViewModel {
 
     private let service = MovieService()
 
-    /// Loads the popular movies shown when there is no search.
+    /// Loads the popular movies shown when there is no search,
+    /// respecting the selected year filter.
     func loadPopularMovies() {
         Task {
             do {
-                movies = try await service.fetchPopularMovies()
+                movies = try await service.fetchPopularMovies(year: selectedYear)
                 onMoviesUpdated?()
             }
             catch {
