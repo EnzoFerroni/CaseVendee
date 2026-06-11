@@ -5,7 +5,6 @@
 //  Created by Enzo Ferroni on 11/06/26.
 //
 
-import SwiftUI
 import UIKit
 
 /// Main screen: movie table, search bar and release-year filter.
@@ -136,15 +135,14 @@ extension MovieListViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 
 extension MovieListViewController: UITableViewDelegate {
-    /// Opens the SwiftUI detail screen for the tapped movie.
+    /// Opens the detail screen for the tapped movie.
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
         let movie = viewModel.movies[indexPath.row]
-        let detailView = MovieDetailView(movie: movie)
-        let hostingController = UIHostingController(rootView: detailView)
+        let detailViewController = MovieDetailViewController(movie: movie)
 
-        navigationController?.pushViewController(hostingController, animated: true)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
 }
 
