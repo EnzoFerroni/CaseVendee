@@ -32,6 +32,9 @@ final class MovieListViewController: UIViewController {
 
         searchController.searchBar.placeholder = "Search movies"
         searchController.searchBar.delegate = self
+        // Keeps the navigation bar (and the filter button) visible
+        // while the user is typing a search.
+        searchController.hidesNavigationBarDuringPresentation = false
         navigationItem.searchController = searchController
 
         tableView.dataSource = self
