@@ -11,12 +11,9 @@ import UIKit
 final class MovieCell: UITableViewCell {
     static let identifier = "MovieCell"
 
-    private let posterImageView = UIImageView()
+    private let posterImageView = PosterImageView()
     private let titleLabel = UILabel()
     private let infoLabel = UILabel()
-
-    /// Keeps the poster download so it can be cancelled on reuse.
-    private var imageTask: Task<Void, Never>?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -29,33 +26,19 @@ final class MovieCell: UITableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
-        imageTask?.cancel()
-        posterImageView.image = nil
+        posterImageView.cancelLoading()
     }
 
     /// Fills the cell with the movie data and loads its poster.
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
-        infoLabel.text = "\(movie.releaseYear)  ·  ★ " +
-            String(format: "%.1f", movie.voteAverage)
-
-        guard let posterURL = movie.posterURL else {
-            return
-        }
-
-        imageTask = Task {
-            posterImageView.image = await ImageLoader.shared.loadImage(from: posterURL)
-        }
+        infoLabel.text = movie.summaryText
+        posterImageView.showPoster(from: movie.posterURL)
     }
 
     /// Builds the layout: poster on the left, labels stacked on the right.
     private func setupView() {
         accessoryType = .disclosureIndicator
-
-        posterImageView.contentMode = .scaleAspectFill
-        posterImageView.clipsToBounds = true
-        posterImageView.layer.cornerRadius = 8
-        posterImageView.backgroundColor = .secondarySystemBackground
 
         titleLabel.font = .preferredFont(forTextStyle: .headline)
         titleLabel.numberOfLines = 2

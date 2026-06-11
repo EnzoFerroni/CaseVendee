@@ -33,6 +33,11 @@ struct Movie: Decodable {
 
         return String(releaseDate.prefix(4))
     }
+
+    /// Short "year · rating" line shown in the list and detail screens.
+    var summaryText: String {
+        "\(releaseYear)  ·  ★ " + String(format: "%.1f", voteAverage)
+    }
 }
 
 /// Top-level object returned by the TMDb list endpoints.
