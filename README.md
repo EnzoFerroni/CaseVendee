@@ -30,7 +30,7 @@ cd CaseVendee
 
 **2. Add your TMDb token**
 
-The token is kept out of version control. Create `CaseVendee/Secrets.xcconfig` with your own token (themoviedb.org, Settings, API, "API Read Access Token"):
+The token is kept out of version control. Create `CaseVendee/Secrets.xcconfig` with your own token (themoviedb.org → Settings → API → "API Read Access Token"):
 
 ```
 TMDB_ACCESS_TOKEN = your_token_here
@@ -61,25 +61,33 @@ The view model notifies the view through two closures (`onMoviesUpdated`, `onErr
 ## Technical Decisions
 
 **View code**
+
 Every layout is built with Auto Layout in code. The window is created programmatically in `SceneDelegate` and no storyboard files are used.
 
 **`final class`**
+
 All classes are marked `final` because none are designed to be subclassed. This enables direct dispatch instead of dynamic dispatch on every method call, and makes the intent clear to anyone reading the code.
 
 **Retain cycles and `[weak self]`**
+
 `[weak self]` is used in every closure that captures the view controller, specifically in the view model bindings and in the year filter menu actions. Without it, the view model would hold a strong reference back to the view controller, keeping it alive after the screen closes.
 
 **Poster cache with `NSCache`**
+
 `ImageLoader` keeps downloaded posters in an `NSCache`. Unlike a dictionary, `NSCache` is automatically purged by the system under memory pressure, so there is no need for manual eviction logic.
 
 **Cell reuse and download cancellation**
+
 `UITableViewCell` instances are recycled as the user scrolls. `PosterImageView` holds a reference to its active download `Task` and cancels it in `prepareForReuse`, preventing a recycled cell from briefly showing the poster of the previous movie.
 
 **`@MainActor`**
+
 `MovieListViewModel` is annotated with `@MainActor` so every property update and closure callback is guaranteed to run on the main thread, which UIKit requires for all UI updates.
 
 **`async/await` networking**
+
 All TMDb requests use `URLSession` with `async/await`. Each call is wrapped in a `Task` so it can be triggered from synchronous UIKit code. Errors are caught and forwarded to the view through the `onError` closure.
 
 **API token via `Secrets.xcconfig`**
+
 The TMDb token is injected at build time through a gitignored `.xcconfig` file. At runtime, `Secrets.swift` reads it from `Bundle.main.infoDictionary`, keeping the key out of version control.
