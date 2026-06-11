@@ -50,14 +50,19 @@ final class MovieDetailViewController: UIViewController {
     private func setupView() {
         view.backgroundColor = .systemBackground
 
-        titleLabel.font = .boldSystemFont(ofSize: 28)
+        // Scales the bold title with the user's text size setting.
+        titleLabel.font = UIFontMetrics(forTextStyle: .title1)
+            .scaledFont(for: .boldSystemFont(ofSize: 28))
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
 
         infoLabel.font = .preferredFont(forTextStyle: .subheadline)
         infoLabel.textColor = .secondaryLabel
+        infoLabel.adjustsFontForContentSizeCategory = true
 
         overviewLabel.font = .preferredFont(forTextStyle: .body)
         overviewLabel.numberOfLines = 0
+        overviewLabel.adjustsFontForContentSizeCategory = true
 
         // A single stack holds all content so the scroll view
         // only needs to manage one subview.

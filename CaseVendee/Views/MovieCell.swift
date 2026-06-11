@@ -46,9 +46,12 @@ final class MovieCell: UITableViewCell {
 
         titleLabel.font = .preferredFont(forTextStyle: .headline)
         titleLabel.numberOfLines = 2
+        // Lets the text grow with the user's text size setting.
+        titleLabel.adjustsFontForContentSizeCategory = true
 
         infoLabel.font = .preferredFont(forTextStyle: .subheadline)
         infoLabel.textColor = .secondaryLabel
+        infoLabel.adjustsFontForContentSizeCategory = true
 
         let textStack = UIStackView(arrangedSubviews: [titleLabel, infoLabel])
         textStack.axis = .vertical
