@@ -3,23 +3,17 @@
 [![Platform](https://img.shields.io/badge/Platform-iOS-blue.svg?style=flat)](https://developer.apple.com/ios/)
 [![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://swift.org)
 [![UIKit](https://img.shields.io/badge/UIKit-View%20Code-green.svg?style=flat)](https://developer.apple.com/documentation/uikit)
-[![SwiftUI](https://img.shields.io/badge/SwiftUI-Detail%20Screen-purple.svg?style=flat)](https://developer.apple.com/documentation/swiftui)
 [![Architecture](https://img.shields.io/badge/Architecture-MVVM-red.svg?style=flat)](#architecture)
 
-CaseVendee is an iOS app that consumes [The Movie Database (TMDb)](https://www.themoviedb.org)
-API. The main screen lists popular movies in a `UITableView` built entirely
-with **view code**, and supports text search with custom parameters
-(release-year filter, pt-BR localized results). Tapping a movie opens a
-detail screen — written in **SwiftUI** and hosted by a `UIHostingController` —
-with poster, year, rating and overview.
-
-The project was developed for a selection case and intentionally mirrors the
-scenario described in the job posting: a consolidated UIKit codebase being
-**gradually migrated to SwiftUI**.
+CaseVendee is an iOS app, written **100% in UIKit with view code**, that
+consumes [The Movie Database (TMDb)](https://www.themoviedb.org) API. The
+main screen lists popular movies in a `UITableView` and supports text search
+with custom parameters (release-year filter, pt-BR localized results).
+Tapping a movie opens a detail screen with poster, year, rating and overview.
 
 ## Screenshots
 
-| Popular movies | Year filter | Search | Detail (SwiftUI) |
+| Popular movies | Year filter | Search | Detail |
 | --- | --- | --- | --- |
 | ![Movie list](Screenshots/movie-list.png) | ![Year filter](Screenshots/year-filter.png) | ![Search](Screenshots/search.png) | ![Movie detail](Screenshots/movie-detail.png) |
 
@@ -28,8 +22,9 @@ scenario described in the job posting: a consolidated UIKit codebase being
 - Popular movies list consuming the TMDb API
 - Search by text with custom parameters (`query`, `primary_release_year`, `language`)
 - Release-year filter available in the navigation bar (`UIMenu`)
-- Movie detail screen in SwiftUI (gradual migration strategy)
-- Poster image download with in-memory cache (`NSCache`)
+- Movie detail screen with poster, year, rating and overview
+- Poster image download with in-memory cache (`NSCache`) and a
+  placeholder symbol for movies without a poster
 - No external dependencies — 100% native frameworks
 
 ## Requirements
@@ -72,16 +67,16 @@ The app follows **MVVM**. In UIKit, the view controller belongs to the View
 layer: it only builds the layout and forwards user events, while state and
 logic live in the view model, and networking in a dedicated service.
 
-Files are grouped by feature, keeping each screen's MVVM pieces together:
+Files are grouped by layer:
 
 ```
 CaseVendee/
-├── App/                 AppDelegate, SceneDelegate (window in code)
-├── Models/              Movie, MovieResponse (Decodable)
-├── Services/            MovieService (TMDb requests), ImageLoader (poster cache)
-└── Features/
-    ├── MovieList/       MovieListViewController, MovieListViewModel, MovieCell
-    └── MovieDetail/     MovieDetailView (SwiftUI)
+├── App/             AppDelegate, SceneDelegate (window in code)
+├── Models/          Movie, MovieResponse (Decodable)
+├── Services/        MovieService (TMDb requests), ImageLoader (poster cache)
+├── ViewModels/      MovieListViewModel (list state, search, year filter)
+├── Views/           MovieCell, PosterImageView (shared poster component)
+└── Controllers/     MovieListViewController, MovieDetailViewController
 ```
 
 The view model notifies the view through closures (`onMoviesUpdated`,
@@ -93,8 +88,9 @@ third-party frameworks.
 - **View code, no storyboards**: the window is created programmatically in
   `SceneDelegate` and every layout uses Auto Layout in code, as required by
   the position.
-- **SwiftUI detail screen**: demonstrates the gradual UIKit-to-SwiftUI
-  migration through `UIHostingController`, keeping navigation in UIKit.
+- **Shared poster component**: `PosterImageView` encapsulates download,
+  cache, cancellation and the no-poster placeholder, and is reused by the
+  list cell and the detail screen.
 - **async/await networking**: modern concurrency with `URLSession`,
   authenticated with a TMDb v4 token via `Authorization: Bearer` header.
 - **Memory management**: `[weak self]` in every closure to avoid retain
