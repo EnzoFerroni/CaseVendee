@@ -108,3 +108,7 @@ All labels use scalable fonts with `adjustsFontForContentSizeCategory`, so the a
 **Pagination left out on purpose**
 
 TMDb responses are paginated, but the app intentionally shows only the first page (20 movies) to keep the code minimal. Adding infinite scroll would mean tracking the current page in the view model and triggering a fetch from `willDisplay`.
+
+## License
+
+Released under the [MIT License](LICENSE). Copyright (c) 2026 Enzo Ferroni. Movie data and images are provided by [TMDb](https://www.themoviedb.org); this product uses the TMDb API but is not endorsed or certified by TMDb.
